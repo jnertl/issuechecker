@@ -11,7 +11,7 @@ pipeline {
                 [key: 'issue_url', value: '$.issue.url'],
                 [key: 'repository_full_name', value: '$.repository.full_name'] // do we need this
             ],
-            token: 'k8v2z1pQwLr6sXy',
+            token: 'omovmlauXnIDP',
             printContributedVariables: true,
             printPostContent: true,
         )
