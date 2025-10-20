@@ -39,7 +39,7 @@ pipeline {
 
                     uv venv venv_ai_issue_check
                     . venv_ai_issue_check/bin/activate
-                    uv pip install -r requirements.txt
+                    ~/.local/bin/uv venv pip install -r requirements.txt
                 '''
             }
         }
