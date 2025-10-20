@@ -37,7 +37,7 @@ pipeline {
                     echo "issue url $issue_url"
                     echo "repository full name $repository_full_name"
 
-                    uv venv venv_ai_issue_check
+                    ~/.local/bin/uv venv venv_ai_issue_check
                     . venv_ai_issue_check/bin/activate
                     ~/.local/bin/uv venv pip install -r requirements.txt
                 '''
