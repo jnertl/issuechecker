@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    triggers {
+        GenericTrigger(
+            genericVariables: [
+                [key: 'issue', value: '$.issue.number'],
+                [key: 'title', value: '$.issue.title'],
+                [key: 'body', value: '$.issue.body'],
+                [key: 'action', value: '$.action'],
+                [key: 'issue_url', value: '$.issue.url'],
+                [key: 'repository_full_name', value: '$.repository.full_name'] // do we need this
+            ],
+            token: 'k8v2z1pQwLr6sXy',
+            printContributedVariables: true,
+            printPostContent: true,
+        )
+    }
+
+    stages {
+        stage('Analyze issue') {
+            when { expression { return issue } }
+            agent { docker {
+                image 'python:3.13'
+                reuseNode true
+            } }
+            environment {
+                GOOGLE_API_KEY = credentials('GOOGLE_API_KEY_JANI')
+            }
+            steps {
+                echo "Hello"
+                sh '''
+                    echo "issue number $issue"
+                    echo "title $title"
+                    echo "body $body"
+                    echo "action $action"
+                    echo "issue url $issue_url"
+                    echo "repository full name $repository_full_name"
+
+                    uv venv venv_ai_issue_check
+                    . venv_ai_issue_check/bin/activate
+                    uv pip install -r requirements.txt
+                '''
+            }
+        }
+    }
+}
