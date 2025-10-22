@@ -102,10 +102,10 @@ pipeline {
                     export OLLAMA_BASE_URL="http://localhost:11434"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
 
-                    #PROVIDER="ollama"
-                    #MODEL="granite4:micro-h"
-                    PROVIDER="gemini"
-                    MODEL="gemini-2.5-flash"
+                    PROVIDER="ollama"
+                    MODEL="granite4:micro-h"
+                    #PROVIDER="gemini"
+                    #MODEL="gemini-2.5-flash"
 
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
                     python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
