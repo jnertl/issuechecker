@@ -1,0 +1,16 @@
+{{ISSUE_TITLE}}
+
+{{ISSUE_BODY}}
+
+Main thing to consider:
+ - is the ticket is clear enough to implement and to test without needing for clarification from ticket creator?
+ - Start response with string '[TICKET IS UNCLEAR]' if more clarification needed.
+ - Start response with string '[TICKET IS CLEAR]' if no more clarification needed.
+ 
+If the ticket is unclear, ask detailed questions which would need to be addressed.
+
+Use file tool to read files and to create context around ticket.
+{{MIDDLEWARE_SOURCE_CODE}} (folder) is c++ middleware application and has Unit Tests made with GoogleTest.
+{{GUI_CLIENT_SOURCE_CODE}} (folder) is Python client application and has Unit Tests made with. Client connects to middleware application by Linux socket.
+{{TEST_REQUIREMENTS_FILE}} (file) is for integration testing requirements.
+{{INTEGRATION_TEST_SOURCE_CODE}} (folder) is for integration testing. It uses pytest.
