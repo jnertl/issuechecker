@@ -20,6 +20,7 @@ pipeline {
     environment {
         git_checkout_root = '/var/jenkins_home/workspace/issue_check_git_checkout'
         GOOGLE_API_KEY = credentials('GOOGLE_API_KEY_JANI')
+        GITHUB_TOKEN = credentials('GITHUB_TOKEN_ISSUES_JANI')
     }
     stages {
         stage('Checkout') {
@@ -114,6 +115,9 @@ pipeline {
                     python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
                         "agent_response.md" \
                         "$WORKSPACE/agent_response.md"
+
+                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/agent_response.md" || echo "No response generated.")
+                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
                     echo 'Analysing GitHub issue completed.'
                 '''
