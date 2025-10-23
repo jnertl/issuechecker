@@ -211,10 +211,10 @@ pipeline {
                         response=$(python scripts/github_pr.py \
                         --local \
                         --git-dir "${INTEGRATION_TEST_SOURCE_CODE}" \
-                        --repo https://github.com/jnertl/testing.git \
-                        --head $BRANCH_NAME \
-                        --base main \
-                        --title $TITLE \
+                        --repo "https://github.com/jnertl/testing.git" \
+                        --head "$BRANCH_NAME" \
+                        --base "main" \
+                        --title "$TITLE" \
                         --body "This is body text for the integration test updates." \
                         --commit-message "Commit integration test updates for issue #${issue}" \
                         --token $GITHUB_TOKEN)
