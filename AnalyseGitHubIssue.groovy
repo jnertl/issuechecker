@@ -58,8 +58,8 @@ pipeline {
                     rm -fr "${WORKSPACE}/agent_log.txt" || true
                     rm -fr "${WORKSPACE}/agent_response.md" || true
                     rm -fr "${WORKSPACE}/issue_ticket_analysis.md" || true
-                    rm -fr "${WORKSPACE}/middlewaresw_developer_analysis.md" || true
-                    rm -fr "${WORKSPACE}/mwclientwithgui_developer_analysis.md" || true
+                    rm -fr "${WORKSPACE}/middlewaresw_analysis.md" || true
+                    rm -fr "${WORKSPACE}/mwclientwithgui_analysis.md" || true
                     rm -fr "${WORKSPACE}/integration_testing_analysis.md" || true
                 '''
             }
@@ -114,7 +114,6 @@ pipeline {
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to issue ticket analysis..."                     >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
-
                     rm -fr "agent_response.md" || true
                     ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
@@ -126,7 +125,11 @@ pipeline {
                         "$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
 
                     AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" || echo "No response generated.")
-                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
+                    python ./scripts/github_comment.py \
+                        --repo $repository_full_name \
+                        --issue $issue \
+                        --body "$AGENT_RESPONSE_CONTENT" \
+                        --token $GITHUB_TOKEN
 
                     # Check if AGENT_RESPONSE_CONTENT contains the exact marker
                     if printf '%s\n' "$AGENT_RESPONSE_CONTENT" | grep -F -q '[TICKET IS CLEAR]'; then
@@ -137,100 +140,43 @@ pipeline {
                         exit 0
                     fi
 
-
                     echo "\n\n\n" >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to middlewaresw analysis..."                     >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
-
-                    rm -fr "agent_response.md" || true
-                    export ISSUE_TICKET_FOR_MIDDLEWARESW="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
-                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/middlewaresw_developer.txt"
-                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
-                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
-
-                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
-                        "agent_response.md" \
-                        "$WORKSPACE/middlewaresw_developer_analysis.md"
-
-                    GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/middlewaresw diff)
-                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/middlewaresw_developer_analysis.md" || echo "No response generated.")
-                    if [ -n "$GIT_DIFF" ]; then
-                        AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
-                    else
-                        echo "No git diff for middlewaresw" >> agent_log.txt
-                    fi
-                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
+                    source scripts/run_agent_component.sh \
+                        --component middlewaresw \
+                        --issue "$issue" \
+                        --repo $repository_full_name \
+                        --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
+                        --provider "$PROVIDER" \
+                        --model "$MODEL"
 
 
                     echo "\n\n\n" >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to mwclientwithgui analysis..."                  >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
-
-                    rm -fr "agent_response.md" || true
-                    export ISSUE_TICKET_FOR_MWCLIENTWITHGUI="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
-                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/mwclientwithgui_developer.txt"
-                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
-                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
-
-                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
-                        "agent_response.md" \
-                        "$WORKSPACE/mwclientwithgui_developer_analysis.md"
-
-                    GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/mwclientwithgui diff)
-                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/mwclientwithgui_developer_analysis.md" || echo "No response generated.")
-                    if [ -n "$GIT_DIFF" ]; then
-                        AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
-                    else
-                        echo "No git diff for mwclientwithgui" >> agent_log.txt
-                    fi
-                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
+                    source scripts/run_agent_component.sh \
+                        --component mwclientwithgui \
+                        --issue "$issue" \
+                        --repo $repository_full_name \
+                        --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
+                        --provider "$PROVIDER" \
+                        --model "$MODEL"
 
 
                     echo "\n\n\n" >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to integration testing analysis..."              >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
-
-                    rm -fr "agent_response.md" || true
-                    export ISSUE_TICKET_FOR_INTEGRATION_TESTING="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
-                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/integration_testing.txt"
-                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
-                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
-
-                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
-                        "agent_response.md" \
-                        "$WORKSPACE/integration_testing_analysis.md"
-
-                    GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/testing diff)
-                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/integration_testing_analysis.md" || echo "No response generated.")
-                    if [ -n "$GIT_DIFF" ]; then
-                        BRANCH_NAME="issue_${issue}_integration_test_updates"
-                        TITLE="Integration test updates for issue #${issue}"
-                        response=$(python scripts/github_pr.py \
-                        --local \
-                        --git-dir "${INTEGRATION_TEST_SOURCE_CODE}" \
-                        --repo "https://github.com/jnertl/testing.git" \
-                        --head "$BRANCH_NAME" \
-                        --base "main" \
-                        --title "$TITLE" \
-                        --body "This is body text for the integration test updates." \
-                        --commit-message "Commit integration test updates for issue #${issue}" \
-                        --token $GITHUB_TOKEN)
-                        echo "Created PR response: $response" >> agent_log.txt
-                        # extract Branch URL from response output
-                        BRANCH_URL=$(printf '%s\n' "$response" | sed -n 's/^[[:space:]]*Branch URL:[[:space:]]*//p' | head -n1)
-                        if [ -n "$BRANCH_URL" ]; then
-                            echo "Found Branch URL: $BRANCH_URL" >> agent_log.txt
-                            AGENT_RESPONSE_CONTENT=$(printf '%s\n\n**See branch [%s](%s)**\n' "$AGENT_RESPONSE_CONTENT" "$BRANCH_NAME" "$BRANCH_URL")
-                        else
-                            echo "No Branch URL found in response" >> agent_log.txt
-                        fi
-                    else
-                        echo "No git diff for integration testing" >> agent_log.txt
-                    fi
-                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
+                    source scripts/run_agent_component.sh \
+                        --component integration_testing \
+                        --issue "$issue" \
+                        --repo $repository_full_name \
+                        --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
+                        --provider "$PROVIDER" \
+                        --model "$MODEL"
 
                     cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
                     echo 'Analysing GitHub issue completed.'
@@ -252,12 +198,12 @@ pipeline {
                 allowEmptyArchive: true
             )
             archiveArtifacts(
-                artifacts: 'middlewaresw_developer_analysis.md',
+                artifacts: 'middlewaresw_analysis.md',
                 fingerprint: true,
                 allowEmptyArchive: true
             )
             archiveArtifacts(
-                artifacts: 'mwclientwithgui_developer_analysis.md',
+                artifacts: 'mwclientwithgui_analysis.md',
                 fingerprint: true,
                 allowEmptyArchive: true
             )
