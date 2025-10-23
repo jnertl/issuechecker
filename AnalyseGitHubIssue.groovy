@@ -170,7 +170,7 @@ pipeline {
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to integration testing analysis..."              >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
-                    source scripts/run_agent_component.sh \
+                    source ./scripts/run_agent_component.sh \
                         --component integration_testing \
                         --issue "$issue" \
                         --repo $repository_full_name \
