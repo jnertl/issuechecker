@@ -206,7 +206,27 @@ pipeline {
                     GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/testing diff)
                     AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/integration_testing_analysis.md" || echo "No response generated.")
                     if [ -n "$GIT_DIFF" ]; then
-                        AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                        BRANCH_NAME="issue_${issue}_integration_test_updates"
+                        TITLE="Integration test updates for issue #${issue}"
+                        response=$(python scripts/github_pr.py \
+                        --local \
+                        --git-dir "${INTEGRATION_TEST_SOURCE_CODE}" \
+                        --repo https://github.com/jnertl/testing.git \
+                        --head $BRANCH_NAME \
+                        --base main \
+                        --title $TITLE \
+                        --body "This is body text for the integration test updates." \
+                        --commit-message "Commit integration test updates for issue #${issue}" \
+                        --token $GITHUB_TOKEN)
+                        echo "Created PR response: $response" >> agent_log.txt
+                        # extract Branch URL from response output
+                        BRANCH_URL=$(printf '%s\n' "$response" | sed -n 's/^[[:space:]]*Branch URL:[[:space:]]*//p' | head -n1)
+                        if [ -n "$BRANCH_URL" ]; then
+                            echo "Found Branch URL: $BRANCH_URL" >> agent_log.txt
+                            AGENT_RESPONSE_CONTENT=$(printf '%s\n\n**See branch [%s](%s)**\n' "$AGENT_RESPONSE_CONTENT" "$BRANCH_NAME" "$BRANCH_URL")
+                        else
+                            echo "No Branch URL found in response" >> agent_log.txt
+                        fi
                     else
                         echo "No git diff for integration testing" >> agent_log.txt
                     fi
