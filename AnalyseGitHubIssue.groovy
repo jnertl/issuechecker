@@ -113,7 +113,7 @@ pipeline {
                     echo "Proceeding to issue ticket analysis..."                     >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
 
-                    rm -fr "${WORKSPACE}/agent_response.md" || true
+                    rm -fr "agent_response.md" || true
                     ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
@@ -140,7 +140,7 @@ pipeline {
                     echo "Proceeding to integration testing analysis..."              >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
 
-                    rm -fr "${WORKSPACE}/agent_response.md" || true
+                    rm -fr "agent_response.md" || true
                     export ISSUE_TICKET_FOR_INTEGRATION_TESTING="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/integration_testing.txt"
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
