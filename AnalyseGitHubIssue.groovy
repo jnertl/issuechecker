@@ -113,6 +113,7 @@ pipeline {
                     echo "Proceeding to issue ticket analysis..."                     >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
 
+                    rm -fr "${WORKSPACE}/agent_response.md" || true
                     ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
@@ -134,12 +135,13 @@ pipeline {
                         exit 0
                     fi
 
+                    echo "\n\n\n" >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to integration testing analysis..."              >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
 
+                    rm -fr "${WORKSPACE}/agent_response.md" || true
                     export ISSUE_TICKET_FOR_INTEGRATION_TESTING="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
-
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/integration_testing.txt"
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
                     python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
@@ -148,7 +150,10 @@ pipeline {
                         "agent_response.md" \
                         "$WORKSPACE/integration_testing_analysis.md"
 
+                    GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/testing diff)
+                    
                     AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/integration_testing_analysis.md" || echo "No response generated.")
+                    AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
                     python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
                     cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
