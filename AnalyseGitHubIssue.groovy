@@ -137,6 +137,28 @@ pipeline {
 
                     echo "\n\n\n" >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
+                    echo "Proceeding to middlewaresw analysis..."                     >> agent_log.txt
+                    echo "**********************************************************" >> agent_log.txt
+
+                    rm -fr "agent_response.md" || true
+                    export ISSUE_TICKET_FOR_MIDDLEWARESW="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
+                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/middlewaresw_developer.txt"
+                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
+                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
+
+                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
+                        "agent_response.md" \
+                        "$WORKSPACE/middlewaresw_developer_analysis.md"
+
+                    GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/middlewaresw diff)
+
+                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/middlewaresw_developer_analysis.md" || echo "No response generated.")
+                    AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
+
+
+                    echo "\n\n\n" >> agent_log.txt
+                    echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to integration testing analysis..."              >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
 
