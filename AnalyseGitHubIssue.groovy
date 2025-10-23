@@ -176,7 +176,11 @@ pipeline {
                     GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/testing diff)
                     
                     AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/integration_testing_analysis.md" || echo "No response generated.")
-                    AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                    if [ -n "$GIT_DIFF" ]; then
+                        AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                    else
+                        echo "No git diff for testing" >> agent_log.txt
+                    fi
                     python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
                     cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
