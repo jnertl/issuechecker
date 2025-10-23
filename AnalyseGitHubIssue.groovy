@@ -59,6 +59,7 @@ pipeline {
                     rm -fr "${WORKSPACE}/agent_response.md" || true
                     rm -fr "${WORKSPACE}/issue_ticket_analysis.md" || true
                     rm -fr "${WORKSPACE}/integration_testing_analysis.md" || true
+                    rm -fr "${WORKSPACE}/middlewaresw_developer_analysis.md" || true
                 '''
             }
         }
@@ -194,6 +195,11 @@ pipeline {
             )
             archiveArtifacts(
                 artifacts: 'issue_ticket_analysis.md',
+                fingerprint: true,
+                allowEmptyArchive: true
+            )
+            archiveArtifacts(
+                artifacts: 'middlewaresw_developer_analysis.md',
                 fingerprint: true,
                 allowEmptyArchive: true
             )
