@@ -145,7 +145,7 @@ pipeline {
                     echo "Proceeding to middlewaresw analysis..."                     >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     bash ./scripts/run_agent_component.sh \
-                        --component middlewaresw \
+                        middlewaresw \
                         --issue "$issue" \
                         --repo $repository_full_name \
                         --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
@@ -158,7 +158,7 @@ pipeline {
                     echo "Proceeding to mwclientwithgui analysis..."                  >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     bash ./scripts/run_agent_component.sh \
-                        --component mwclientwithgui \
+                        mwclientwithgui \
                         --issue "$issue" \
                         --repo $repository_full_name \
                         --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
@@ -171,7 +171,7 @@ pipeline {
                     echo "Proceeding to integration testing analysis..."              >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     bash ./scripts/run_agent_component.sh \
-                        --component integration_testing \
+                        integration_testing \
                         --issue "$issue" \
                         --repo $repository_full_name \
                         --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
