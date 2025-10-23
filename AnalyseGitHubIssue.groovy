@@ -57,6 +57,8 @@ pipeline {
                 sh '''
                     rm -fr "${WORKSPACE}/agent_log.txt" || true
                     rm -fr "${WORKSPACE}/agent_response.md" || true
+                    rm -fr "${WORKSPACE}/issue_ticket_analysis.md" || true
+                    rm -fr "${WORKSPACE}/integration_testing_analysis.md" || true
                 '''
             }
         }
@@ -101,24 +103,44 @@ pipeline {
                     ~/.local/bin/uv pip install -r requirements.txt --link-mode=copy
 
                     export OLLAMA_BASE_URL="http://localhost:11434"
-                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
 
                     #PROVIDER="ollama"
                     #MODEL="granite4:micro-h"
                     PROVIDER="gemini"
                     MODEL="gemini-2.5-flash"
 
+                    ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
+                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
                     python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
 
-                    cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
                     python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
                         "agent_response.md" \
-                        "$WORKSPACE/agent_response.md"
+                        "$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
 
-                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/agent_response.md" || echo "No response generated.")
+                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" || echo "No response generated.")
                     python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
+                    # Check if AGENT_RESPONSE_CONTENT contains the exact marker
+                    if printf '%s\n' "$AGENT_RESPONSE_CONTENT" | grep -F -q '[TICKET IS CLEAR]'; then
+                        echo "Analysis: [TICKET IS CLEAR]"
+                    else
+                        echo 'Analysing GitHub issue completed. [TICKET IS NOT CLEAR]'
+                        cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
+                        exit 0
+                    fi
+
+                    export ISSUE_TICKET_FOR_INTEGRATION_TESTING="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
+
+                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/integration_testing.txt"
+                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
+                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
+
+                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
+                        "agent_response.md" \
+                        "$WORKSPACE/integration_testing_analysis.md"
+
+                    cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
                     echo 'Analysing GitHub issue completed.'
                 '''
             }
@@ -133,7 +155,12 @@ pipeline {
                 allowEmptyArchive: true
             )
             archiveArtifacts(
-                artifacts: 'agent_response.md',
+                artifacts: 'issue_ticket_analysis.md',
+                fingerprint: true,
+                allowEmptyArchive: true
+            )
+            archiveArtifacts(
+                artifacts: 'integration_testing_analysis.md',
                 fingerprint: true,
                 allowEmptyArchive: true
             )

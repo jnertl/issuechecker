@@ -1,0 +1,7 @@
+Use file tool to read files and to create context around ticket.
+{{TEST_REQUIREMENTS_FILE}} (file) is for integration testing requirements.
+{{INTEGRATION_TEST_SOURCE_CODE}} (folder) is for integration testing. It uses pytest.
+
+Analyse {{ISSUE_TICKET_FOR_INTEGRATION_TESTING}} and update {{TEST_REQUIREMENTS_FILE}} if everything is clear.
+Propose also new test cases or extend existing.
+Do not run test cases.
