@@ -109,6 +109,10 @@ pipeline {
                     PROVIDER="gemini"
                     MODEL="gemini-2.5-flash"
 
+                    echo "**********************************************************" >> agent_log.txt
+                    echo "Proceeding to issue ticket analysis..."                     >> agent_log.txt
+                    echo "**********************************************************" >> agent_log.txt
+
                     ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
@@ -130,6 +134,10 @@ pipeline {
                         exit 0
                     fi
 
+                    echo "**********************************************************" >> agent_log.txt
+                    echo "Proceeding to integration testing analysis..."              >> agent_log.txt
+                    echo "**********************************************************" >> agent_log.txt
+
                     export ISSUE_TICKET_FOR_INTEGRATION_TESTING="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
 
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/integration_testing.txt"
@@ -139,6 +147,9 @@ pipeline {
                     python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
                         "agent_response.md" \
                         "$WORKSPACE/integration_testing_analysis.md"
+
+                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/integration_testing_analysis.md" || echo "No response generated.")
+                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
                     cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
                     echo 'Analysing GitHub issue completed.'
