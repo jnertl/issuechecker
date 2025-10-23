@@ -58,8 +58,9 @@ pipeline {
                     rm -fr "${WORKSPACE}/agent_log.txt" || true
                     rm -fr "${WORKSPACE}/agent_response.md" || true
                     rm -fr "${WORKSPACE}/issue_ticket_analysis.md" || true
-                    rm -fr "${WORKSPACE}/integration_testing_analysis.md" || true
                     rm -fr "${WORKSPACE}/middlewaresw_developer_analysis.md" || true
+                    rm -fr "${WORKSPACE}/mwclientwithgui_developer_analysis.md" || true
+                    rm -fr "${WORKSPACE}/integration_testing_analysis.md" || true
                 '''
             }
         }
@@ -136,6 +137,7 @@ pipeline {
                         exit 0
                     fi
 
+
                     echo "\n\n\n" >> agent_log.txt
                     echo "**********************************************************" >> agent_log.txt
                     echo "Proceeding to middlewaresw analysis..."                     >> agent_log.txt
@@ -152,9 +154,37 @@ pipeline {
                         "$WORKSPACE/middlewaresw_developer_analysis.md"
 
                     GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/middlewaresw diff)
-
                     AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/middlewaresw_developer_analysis.md" || echo "No response generated.")
-                    AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                    if [ -n "$GIT_DIFF" ]; then
+                        AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                    else
+                        echo "No git diff for middlewaresw" >> agent_log.txt
+                    fi
+                    python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
+
+
+                    echo "\n\n\n" >> agent_log.txt
+                    echo "**********************************************************" >> agent_log.txt
+                    echo "Proceeding to mwclientwithgui analysis..."                  >> agent_log.txt
+                    echo "**********************************************************" >> agent_log.txt
+
+                    rm -fr "agent_response.md" || true
+                    export ISSUE_TICKET_FOR_MWCLIENTWITHGUI="$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
+                    export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/mwclientwithgui_developer.txt"
+                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
+                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
+
+                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
+                        "agent_response.md" \
+                        "$WORKSPACE/mwclientwithgui_developer_analysis.md"
+
+                    GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/mwclientwithgui diff)
+                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/mwclientwithgui_developer_analysis.md" || echo "No response generated.")
+                    if [ -n "$GIT_DIFF" ]; then
+                        AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
+                    else
+                        echo "No git diff for mwclientwithgui" >> agent_log.txt
+                    fi
                     python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
 
@@ -174,12 +204,11 @@ pipeline {
                         "$WORKSPACE/integration_testing_analysis.md"
 
                     GIT_DIFF=$(git -C ${SOURCE_ROOT_DIR}/testing diff)
-                    
                     AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/integration_testing_analysis.md" || echo "No response generated.")
                     if [ -n "$GIT_DIFF" ]; then
                         AGENT_RESPONSE_CONTENT=$(printf '%s\n\n```diff\n%s\n```\n' "$AGENT_RESPONSE_CONTENT" "$GIT_DIFF")
                     else
-                        echo "No git diff for testing" >> agent_log.txt
+                        echo "No git diff for integration testing" >> agent_log.txt
                     fi
                     python ./scripts/github_comment.py --repo $repository_full_name --issue $issue --body "$AGENT_RESPONSE_CONTENT" --token $GITHUB_TOKEN
 
@@ -204,6 +233,11 @@ pipeline {
             )
             archiveArtifacts(
                 artifacts: 'middlewaresw_developer_analysis.md',
+                fingerprint: true,
+                allowEmptyArchive: true
+            )
+            archiveArtifacts(
+                artifacts: 'mwclientwithgui_developer_analysis.md',
                 fingerprint: true,
                 allowEmptyArchive: true
             )
