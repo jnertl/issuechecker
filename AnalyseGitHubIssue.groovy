@@ -104,10 +104,10 @@ pipeline {
                     export ISSUE_TITLE="$title"
                     export ISSUE_BODY="$body"
                     export OLLAMA_BASE_URL="http://localhost:11434"
-                    PROVIDER="ollama"
-                    MODEL="granite4:micro-h"
-                    #PROVIDER="gemini"
-                    #MODEL="gemini-2.5-flash"
+                    #PROVIDER="ollama"
+                    #MODEL="granite4:micro-h"
+                    PROVIDER="gemini"
+                    MODEL="gemini-2.5-flash"
 
                     # Setup Python virtual environment and install dependencies
                     cd "${AGENT_TOOLS_DIR}"
