@@ -109,6 +109,7 @@ pipeline {
                     PROVIDER="gemini"
                     MODEL="gemini-2.5-flash"
 
+                    # Setup Python virtual environment and install dependencies
                     cd "${AGENT_TOOLS_DIR}"
                     ~/.local/bin/uv venv agent_venv
                     . agent_venv/bin/activate
@@ -120,7 +121,12 @@ pipeline {
                     export ISSUE_TICKET_ANALYSIS="${WORKSPACE}/issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "./scripts/ongoing_printer.sh" \
-                    python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
+                    python -m agenttools.agent \
+                      --provider "$PROVIDER" \
+                      --model "$MODEL" \
+                      --silent \
+                      --response-file "$AGENT_RESPONSE_FILE" \
+                      --query "Analyse"
 
                     python "./scripts/clean_markdown_utf8.py" \
                         "$AGENT_RESPONSE_FILE" \
