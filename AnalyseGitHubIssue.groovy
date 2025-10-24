@@ -97,7 +97,7 @@ pipeline {
                     export TEST_REQUIREMENTS_FILE="${SOURCE_ROOT_DIR}/testing/tests/integration/integration_testing_requirements.md"
 
                     AGENT_LOG="${WORKSPACE}/agent_log.txt"
-                    AGENT_TOOLS_DIR="${SOURCE_ROOT_DIR}/agenttools"
+                    export AGENT_TOOLS_DIR="${SOURCE_ROOT_DIR}/agenttools"
 
                     export ISSUE_TITLE="$title"
                     export ISSUE_BODY="$body"
