@@ -96,7 +96,7 @@ pipeline {
                     # Copy integration test requirements for analysis
                     export TEST_REQUIREMENTS_FILE="${SOURCE_ROOT_DIR}/testing/tests/integration/integration_testing_requirements.md"
 
-                    AGENT_LOG="${WORKSPACE}/agent_log.txt"
+                    export AGENT_LOG="${WORKSPACE}/agent_log.txt"
                     export AGENT_TOOLS_DIR="${SOURCE_ROOT_DIR}/agenttools"
 
                     export ISSUE_TITLE="$title"
