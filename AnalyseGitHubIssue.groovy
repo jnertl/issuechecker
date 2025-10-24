@@ -115,6 +115,7 @@ pipeline {
                     . agent_venv/bin/activate
                     ~/.local/bin/uv pip install -r requirements.txt --link-mode=copy
 
+                    echo "\n\n\n" >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
                     echo "Proceeding to issue ticket analysis..."                     >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
@@ -161,7 +162,6 @@ pipeline {
                         middlewaresw \
                         --issue "$issue" \
                         --repo $repository_full_name \
-                        --ticket-file "$ISSUE_TICKET_ANALYSIS" \
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
@@ -174,7 +174,6 @@ pipeline {
                         mwclientwithgui \
                         --issue "$issue" \
                         --repo $repository_full_name \
-                        --ticket-file "$ISSUE_TICKET_ANALYSIS" \
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
@@ -187,7 +186,6 @@ pipeline {
                         integration_testing \
                         --issue "$issue" \
                         --repo $repository_full_name \
-                        --ticket-file "$ISSUE_TICKET_ANALYSIS" \
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
