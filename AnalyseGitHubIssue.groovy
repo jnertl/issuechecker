@@ -158,6 +158,7 @@ pipeline {
                     echo "**********************************************************" >> $AGENT_LOG
                     echo "Proceeding to middlewaresw analysis..."                     >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
+                    export ISSUE_TICKET_FOR_MIDDLEWARESW=$ISSUE_TICKET_ANALYSIS
                     bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
                         middlewaresw \
                         --issue "$issue" \
@@ -170,6 +171,7 @@ pipeline {
                     echo "**********************************************************" >> $AGENT_LOG
                     echo "Proceeding to mwclientwithgui analysis..."                  >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
+                    export ISSUE_TICKET_FOR_MWCLIENTWITHGUI=$ISSUE_TICKET_ANALYSIS
                     bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
                         mwclientwithgui \
                         --issue "$issue" \
@@ -182,6 +184,7 @@ pipeline {
                     echo "**********************************************************" >> $AGENT_LOG
                     echo "Proceeding to integration_testing analysis..."              >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
+                    export ISSUE_TICKET_FOR_INTEGRATION_TESTING=$ISSUE_TICKET_ANALYSIS
                     bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
                         integration_testing \
                         --issue "$issue" \
