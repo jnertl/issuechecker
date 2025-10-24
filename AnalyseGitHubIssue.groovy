@@ -143,7 +143,6 @@ pipeline {
                         echo "Analysis: [TICKET IS CLEAR]"
                     else
                         echo 'Analysing GitHub issue completed. [TICKET IS NOT CLEAR]'
-                        cp $AGENT_LOG "${WORKSPACE}/$AGENT_LOG" || true
                         exit 0
                     fi
 
@@ -185,7 +184,6 @@ pipeline {
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
-                    cp $AGENT_LOG "${WORKSPACE}/agent_log.txt" || true
                     echo 'Analysing GitHub issue completed.'
                 '''
             }
