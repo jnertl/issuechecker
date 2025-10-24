@@ -175,10 +175,10 @@ pipeline {
 
                     echo "\n\n\n" >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
-                    echo "Proceeding to integration testing analysis..."              >> $AGENT_LOG
+                    echo "Proceeding to integrationtesting analysis..."              >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
                     bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
-                        integration_testing \
+                        integrationtesting \
                         --issue "$issue" \
                         --repo $repository_full_name \
                         --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
