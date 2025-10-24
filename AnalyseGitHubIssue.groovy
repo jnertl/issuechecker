@@ -55,7 +55,7 @@ pipeline {
         stage('Cleanup workspace') {
             steps {
                 sh '''
-                    rm -fr "${WORKSPACE}/agent_log.txt" || true
+                    rm -fr "${WORKSPACE}/$AGENT_LOG" || true
                     rm -fr "${WORKSPACE}/agent_response.md" || true
                     rm -fr "${WORKSPACE}/issue_ticket_analysis.md" || true
                     rm -fr "${WORKSPACE}/middlewaresw_analysis.md" || true
@@ -96,24 +96,25 @@ pipeline {
                     # Copy integration test requirements for analysis
                     export TEST_REQUIREMENTS_FILE="${SOURCE_ROOT_DIR}/testing/tests/integration/integration_testing_requirements.md"
 
+                    AGENT_LOG="${WORKSPACE}/agent_log.txt"
+                    AGENT_TOOLS_DIR="${SOURCE_ROOT_DIR}/agenttools"
+
                     export ISSUE_TITLE="$title"
                     export ISSUE_BODY="$body"
-
-                    cd "${SOURCE_ROOT_DIR}/agenttools"
-                    ~/.local/bin/uv venv agent_venv
-                    . agent_venv/bin/activate
-                    ~/.local/bin/uv pip install -r requirements.txt --link-mode=copy
-
                     export OLLAMA_BASE_URL="http://localhost:11434"
-
                     #PROVIDER="ollama"
                     #MODEL="granite4:micro-h"
                     PROVIDER="gemini"
                     MODEL="gemini-2.5-flash"
 
-                    echo "**********************************************************" >> agent_log.txt
-                    echo "Proceeding to issue ticket analysis..."                     >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
+                    cd "${AGENT_TOOLS_DIR}"
+                    ~/.local/bin/uv venv agent_venv
+                    . agent_venv/bin/activate
+                    ~/.local/bin/uv pip install -r requirements.txt --link-mode=copy
+
+                    echo "**********************************************************" >> $AGENT_LOG
+                    echo "Proceeding to issue ticket analysis..."                     >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
                     rm -fr "agent_response.md" || true
                     ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
@@ -131,7 +132,7 @@ pipeline {
                         exit 1
                     fi
 
-                    python ./scripts/github_comment.py \
+                    python ${AGENT_TOOLS_DIR}/scripts/github_comment.py \
                         --repo $repository_full_name \
                         --issue $issue \
                         --body "$AGENT_RESPONSE_CONTENT" \
@@ -142,15 +143,15 @@ pipeline {
                         echo "Analysis: [TICKET IS CLEAR]"
                     else
                         echo 'Analysing GitHub issue completed. [TICKET IS NOT CLEAR]'
-                        cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
+                        cp $AGENT_LOG "${WORKSPACE}/$AGENT_LOG" || true
                         exit 0
                     fi
 
-                    echo "\n\n\n" >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
-                    echo "Proceeding to middlewaresw analysis..."                     >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
-                    bash ./scripts/run_agent_component.sh \
+                    echo "\n\n\n" >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
+                    echo "Proceeding to middlewaresw analysis..."                     >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
+                    bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
                         middlewaresw \
                         --issue "$issue" \
                         --repo $repository_full_name \
@@ -159,11 +160,11 @@ pipeline {
                         --model "$MODEL"
 
 
-                    echo "\n\n\n" >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
-                    echo "Proceeding to mwclientwithgui analysis..."                  >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
-                    bash ./scripts/run_agent_component.sh \
+                    echo "\n\n\n" >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
+                    echo "Proceeding to mwclientwithgui analysis..."                  >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
+                    bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
                         mwclientwithgui \
                         --issue "$issue" \
                         --repo $repository_full_name \
@@ -172,11 +173,11 @@ pipeline {
                         --model "$MODEL"
 
 
-                    echo "\n\n\n" >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
-                    echo "Proceeding to integration testing analysis..."              >> agent_log.txt
-                    echo "**********************************************************" >> agent_log.txt
-                    bash ./scripts/run_agent_component.sh \
+                    echo "\n\n\n" >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
+                    echo "Proceeding to integration testing analysis..."              >> $AGENT_LOG
+                    echo "**********************************************************" >> $AGENT_LOG
+                    bash ${AGENT_TOOLS_DIR}/scripts/run_agent_component.sh \
                         integration_testing \
                         --issue "$issue" \
                         --repo $repository_full_name \
@@ -184,7 +185,7 @@ pipeline {
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
-                    cp agent_log.txt "${WORKSPACE}/agent_log.txt" || true
+                    cp $AGENT_LOG "${WORKSPACE}/$AGENT_LOG" || true
                     echo 'Analysing GitHub issue completed.'
                 '''
             }
@@ -194,7 +195,7 @@ pipeline {
     post {
         always {
             archiveArtifacts(
-                artifacts: 'agent_log.txt',
+                artifacts: '$AGENT_LOG',
                 fingerprint: true,
                 allowEmptyArchive: true
             )
