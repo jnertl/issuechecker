@@ -118,10 +118,10 @@ pipeline {
                     rm -fr "agent_response.md" || true
                     ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
-                    bash "$SOURCE_ROOT_DIR/testing/scripts/ongoing_printer.sh" \
+                    bash "./scripts/ongoing_printer.sh" \
                     python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
 
-                    python "$SOURCE_ROOT_DIR/testing/scripts/clean_markdown_utf8.py" \
+                    python "./scripts/clean_markdown_utf8.py" \
                         "agent_response.md" \
                         "$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
 
