@@ -116,16 +116,16 @@ pipeline {
                     echo "Proceeding to issue ticket analysis..."                     >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
                     rm -fr "agent_response.md" || true
-                    ISSUE_TICKET_ANALYSIS="issue_ticket_analysis.md"
+                    export ISSUE_TICKET_ANALYSIS="${WORKSPACE}/issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "./scripts/ongoing_printer.sh" \
                     python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
 
                     python "./scripts/clean_markdown_utf8.py" \
                         "agent_response.md" \
-                        "$WORKSPACE/$ISSUE_TICKET_ANALYSIS"
+                        "$ISSUE_TICKET_ANALYSIS"
 
-                    AGENT_RESPONSE_CONTENT=$(cat "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" || echo "No response generated.")
+                    AGENT_RESPONSE_CONTENT=$(cat "$ISSUE_TICKET_ANALYSIS" || echo "No response generated.")
                     # If content is only whitespace or contains the default "No response generated." message, stop here
                     if ! printf '%s' "$AGENT_RESPONSE_CONTENT" | grep -q '[^[:space:]]' || printf '%s' "$AGENT_RESPONSE_CONTENT" | grep -F -q 'No response generated.'; then
                         echo "AGENT_RESPONSE_CONTENT is empty or default; skipping comment and further analysis"
@@ -155,7 +155,7 @@ pipeline {
                         middlewaresw \
                         --issue "$issue" \
                         --repo $repository_full_name \
-                        --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
+                        --ticket-file "$ISSUE_TICKET_ANALYSIS" \
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
@@ -168,7 +168,7 @@ pipeline {
                         mwclientwithgui \
                         --issue "$issue" \
                         --repo $repository_full_name \
-                        --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
+                        --ticket-file "$ISSUE_TICKET_ANALYSIS" \
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
@@ -181,7 +181,7 @@ pipeline {
                         integration_testing \
                         --issue "$issue" \
                         --repo $repository_full_name \
-                        --ticket-file "$WORKSPACE/$ISSUE_TICKET_ANALYSIS" \
+                        --ticket-file "$ISSUE_TICKET_ANALYSIS" \
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
