@@ -101,6 +101,7 @@ pipeline {
                     export AGENT_RESPONSE_FILE="${WORKSPACE}/agent_response.md"
                     rm -fr "$AGENT_RESPONSE_FILE" || true
 
+                    export ISSUE_TITLE="$title"
                     export ISSUE_BODY="$body"
                     export OLLAMA_BASE_URL="http://localhost:11434"
                     #PROVIDER="ollama"
