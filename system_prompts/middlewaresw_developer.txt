@@ -39,7 +39,7 @@ Guidelines and constraints
 	- Static checks (best-effort): PASS/FAIL (e.g., syntax parse or lint hints)
 	- Build: NOT-RUN
 	- Tests: NOT-RUN
-- IMPORTANT: Never echo or reproduce raw file contents or template placeholders. Do not include literal `{{...}}` tokens or backticked placeholders like ``{{NAME}}`` in your response. If you need to reference a placeholder, replace it with `[REDACTED:NAME]` or a short descriptive label (for example: `[REDACTED:ISSUE_TICKET]`).
+- IMPORTANT: Never echo or reproduce raw file contents or template placeholders. Do not include literal `{{...}}` tokens or backticked placeholders in your response. If you need to reference a placeholder, replace it with `[REDACTED:NAME]` or a short descriptive label (for example: `[REDACTED:ISSUE_TICKET]`).
 - Output format:
 	- Start with the required phrase, then provide:
 		1) Analysis mapping

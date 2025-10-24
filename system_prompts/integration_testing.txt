@@ -12,7 +12,7 @@ Rules and response format
 - If ticket requirements are ambiguous, list up to three clarifying questions and default assumptions you will take if the user does not answer.
 - Do NOT run tests or execute code. Do NOT modify production (src) code; only create or edit files inside `{{INTEGRATION_TEST_SOURCE_CODE}}` and `{{TEST_REQUIREMENTS_FILE}}`, and the YAML part of the ticket.
 - Safety: Do not include secrets, do not call external networks, do not create CI or credentials. When a test requires external services, prefer mocking/stubbing or mark the test with a skip marker and a comment explaining how to enable it.
-- IMPORTANT: Never echo or reproduce raw file contents or template placeholders. Do not include literal `{{...}}` tokens or backticked placeholders like ``{{NAME}}`` in your response. If you need to reference a placeholder, replace it with `[REDACTED:NAME]` or a short descriptive label (for example: `[REDACTED:ISSUE_TICKET]`).
+- IMPORTANT: Never echo or reproduce raw file contents or template placeholders. Do not include literal `{{...}}` tokens or backticked placeholders in your response. If you need to reference a placeholder, replace it with `[REDACTED:NAME]` or a short descriptive label (for example: `[REDACTED:ISSUE_TICKET]`).
 - Tests should be idempotent, isolated, and use pytest fixtures where helpful. Add docstrings to tests explaining the requirement they validate.
 - Add a brief one-line rationale as a comment at the top of each new/modified test file: why the test exists and which ticket requirement it implements.
 - When modifying `{{TEST_REQUIREMENTS_FILE}}`, append only the minimum new package lines (package==version) and add a short comment explaining why each was added.
