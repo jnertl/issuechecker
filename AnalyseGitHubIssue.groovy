@@ -55,7 +55,7 @@ pipeline {
         stage('Cleanup workspace') {
             steps {
                 sh '''
-                    rm -fr "${WORKSPACE}/$AGENT_LOG" || true
+                    rm -fr "${WORKSPACE}/agent_log.txt" || true
                     rm -fr "${WORKSPACE}/agent_response.md" || true
                     rm -fr "${WORKSPACE}/issue_ticket_analysis.md" || true
                     rm -fr "${WORKSPACE}/middlewaresw_analysis.md" || true
@@ -185,7 +185,7 @@ pipeline {
                         --provider "$PROVIDER" \
                         --model "$MODEL"
 
-                    cp $AGENT_LOG "${WORKSPACE}/$AGENT_LOG" || true
+                    cp $AGENT_LOG "${WORKSPACE}/agent_log.txt" || true
                     echo 'Analysing GitHub issue completed.'
                 '''
             }
@@ -195,7 +195,7 @@ pipeline {
     post {
         always {
             archiveArtifacts(
-                artifacts: '$AGENT_LOG',
+                artifacts: 'agent_log.txt',
                 fingerprint: true,
                 allowEmptyArchive: true
             )
