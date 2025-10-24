@@ -98,8 +98,9 @@ pipeline {
 
                     export AGENT_LOG="${WORKSPACE}/agent_log.txt"
                     export AGENT_TOOLS_DIR="${SOURCE_ROOT_DIR}/agenttools"
+                    export AGENT_RESPONSE_FILE="${WORKSPACE}/agent_response.md"
+                    rm -fr "$AGENT_RESPONSE_FILE" || true
 
-                    export ISSUE_TITLE="$title"
                     export ISSUE_BODY="$body"
                     export OLLAMA_BASE_URL="http://localhost:11434"
                     #PROVIDER="ollama"
@@ -115,14 +116,13 @@ pipeline {
                     echo "**********************************************************" >> $AGENT_LOG
                     echo "Proceeding to issue ticket analysis..."                     >> $AGENT_LOG
                     echo "**********************************************************" >> $AGENT_LOG
-                    rm -fr "agent_response.md" || true
                     export ISSUE_TICKET_ANALYSIS="${WORKSPACE}/issue_ticket_analysis.md"
                     export SYSTEM_PROMPT_FILE="${WORKSPACE}/system_prompts/github_issue_checker.txt"
                     bash "./scripts/ongoing_printer.sh" \
                     python -m agenttools.agent --provider "$PROVIDER" --silent --model "$MODEL" --query "Analyse"
 
                     python "./scripts/clean_markdown_utf8.py" \
-                        "agent_response.md" \
+                        "$AGENT_RESPONSE_FILE" \
                         "$ISSUE_TICKET_ANALYSIS"
 
                     AGENT_RESPONSE_CONTENT=$(cat "$ISSUE_TICKET_ANALYSIS" || echo "No response generated.")
